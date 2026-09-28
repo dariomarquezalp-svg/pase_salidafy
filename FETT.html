@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Pases de Salida - CBTis 258</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --cbtis-vino: #691C32;
+            --cbtis-vino-hover: #4a1323;
+            --cbtis-beige: #C2A269;
+            --cbtis-beige-light: #fdfbf7;
+            --bg-body: #f4f5f7;
+            --text-dark: #2b2b2b;
+            --border-color: #d1d5db;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Montserrat', sans-serif; }
+        body { background-color: var(--bg-body); color: var(--text-dark); padding: 25px 15px; }
+
+        .container { max-width: 1100px; margin: 0 auto; }
+
+        /* HEADER DEL SISTEMA */
+        .system-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .system-header h1 { font-size: 1.8rem; color: var(--cbtis-vino); font-weight: 800; }
+        .system-header p { font-size: 0.95rem; color: #6b7280; font-weight: 500; }
+
+        /* PESTAÑAS (TABS) */
+        .tabs {
+            display: flex;
+            background: #e5e7eb;
+            padding: 5px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            gap: 5px;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: transparent;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: #4b5563;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        .tab-btn.active {
+            background: var(--cbtis-vino);
+            color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+        }
+
+        /* VISTAS / SECCIONES */
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* MODULO DE GENERACIÓN Y VISTA PREVIA */
+        .grid-generator {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        .panel-form {
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border-top: 5px solid var(--cbtis-vino);
+        }
+
+        .panel-form h2 {
+            color: var(--cbtis-vino);
+            font-size: 1.2rem;
+            margin-bottom: 18px;
+            border-bottom: 2px solid var(--cbtis-beige);
+            padding-bottom: 6px;
+        }
+
+        .form-group { margin-bottom: 14px; }
+        .form-group label { display: block; font-size: 0.8rem; font-weight: 700; color: #374151; margin-bottom: 5px; }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.85rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            border-color: var(--cbtis-vino);
+        }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+        .btn-action {
+            width: 100%;
+            background: var(--cbtis-vino);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn-action:hover { background: var(--cbtis-vino-hover); }
+
+        /* DISEÑO DEL PASE DE SALIDA (FORMATO IMPRESIÓN / PDF) */
+        .preview-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .preview-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #6b7280;
+            margin-bottom: 12px;
+        }
+
+        .pass-card {
+            width: 100%;
+            background: #ffffff;
+            border: 2px solid var(--cbtis-vino);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        }
+
+        .pass-header {
+            background: var(--cbtis-vino);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            border-bottom: 4px solid var(--cbtis-beige);
+        }
+
+        .pass-header h1 { font-size: 1.1rem; font-weight: 800; letter-spacing: 0.5px; }
+        .pass-header h2 { font-size: 0.85rem; font-weight: 600; color: var(--cbtis-beige); margin-top: 2px; }
+        .pass-header p { font-size: 0.7rem; opacity: 0.9; margin-top: 3px; }
+
+        .pass-body { padding: 20px; background: var(--cbtis-beige-light); }
+
+        .pass-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            border-bottom: 1px dashed var(--cbtis-beige);
+            padding-bottom: 5px;
+        }
+
+        .pass-label { font-size: 0.75rem; font-weight: 700; color: var(--cbtis-vino); text-transform: uppercase; }
+        .pass-value { font-size: 0.85rem; font-weight: 600; color: #111827; text-align: right; }
+
+        .pass-reason {
+            background: #ffffff;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            margin-top: 10px;
+        }
+
+        .pass-signatures {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 35px;
+            text-align: center;
+        }
+
+        .signature-box {
+            border-top: 1px solid var(--text-dark);
+            padding-top: 5px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #374151;
+        }
+
+        .pass-footer {
+            background: var(--cbtis-beige);
+            color: var(--cbtis-vino);
+            text-align: center;
+            padding: 8px;
+            font-size: 0.65rem;
+            font-weight: 800;
+        }
+
+        /* REGLAS PARA GENERAR PDF / IMPRIMIR */
+        @media print {
+            body { background: none; padding: 0; }
+            .system-header, .tabs, .panel-form, .preview-title { display: none !important; }
+            .grid-generator { display: block; }
+            .pass-card {
+                box-shadow: none;
+                border: 2px solid var(--cbtis-vino);
+                margin: 0 auto;
+                max-width: 500px;
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+    <div class="system-header">
+        <h1>CBTis No. 258</h1>
+        <p>Sistema de Gestión y Generación de Pases de Salida</p>
+    </div>
+
+    <!-- NAVEGACIÓN -->
+    <div class="tabs">
+        <button class="tab-btn active" onclick="showTab('generar')">1. Generar e Imprimir Pase</button>
+        <button class="tab-btn" onclick="showTab('validar')">2. Validar Pase en Puerta</button>
+    </div>
+
+    <!-- PESTAÑA 1: GENERADOR Y VISTA PREVIA -->
+    <div id="tab-generar" class="tab-content active">
+        <div class="grid-generator">
+            
+            <div class="panel-form">
+                <h2>Datos del Pase</h2>
+                
+                <div class="form-group">
+                    <label>Nombre del Alumno</label>
+                    <input type="text" id="in_nombre" value="Ana Sofía López" oninput="updatePass()">
+                </div>
+
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Matrícula / Control</label>
+                        <input type="text" id="in_matricula" value="2131905001" oninput="updatePass()">
+                    </div>
+                    <div class="form-group">
+                        <label>Especialidad / Grupo</label>
+                        <input type="text" id="in_grupo" value="4-A Programación" oninput="updatePass()">
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Fecha</label>
+                        <input type="date" id="in_fecha" onchange="updatePass()">
+                    </div>
+                    <div class="form-group">
+                        <label>Hora de Salida</label>
+                        <input type="time" id="in_hora" onchange="updatePass()">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Tutor que Autoriza / Recoge</label>
+                    <input type="text" id="in_tutor" value="María Elena Torres" oninput="updatePass()">
+                </div>
+
+                <div class="form-group">
+                    <label>CURP del Tutor</label>
+                    <input type="text" id="in_curp" maxlength="18" style="text-transform:uppercase;" value="TORE800101HDFRXX01" oninput="updatePass()">
+                </div>
+
+                <div class="form-group">
+                    <label>Motivo de Salida</label>
+                    <textarea id="in_motivo" rows="2" oninput="updatePass()">Cita médica programada con comprobante adjunto.</textarea>
+                </div>
+
+                <button class="btn-action" onclick="window.print()">
+                    🖨️ Guardar / Imprimir en PDF
+                </button>
+            </div>
+
+            <div class="preview-area">
+                <span class="preview-title">Vista Previa en Tiempo Real</span>
+                
+                <div class="pass-card">
+                    <div class="pass-header">
+                        <h1>CBTis No. 258</h1>
+                        <h2>PASE DE SALIDA OFICIAL</h2>
+                        <p>Dirección & Control Escolar</p>
+                    </div>
+
+                    <div class="pass-body">
+                        <div class="pass-row">
+                            <span class="pass-label">Alumno</span>
+                            <span class="pass-value" id="out_nombre">-</span>
+                        </div>
+                        <div class="pass-row">
+                            <span class="pass-label">Matrícula</span>
+                            <span class="pass-value" id="out_matricula">-</span>
+                        </div>
+                        <div class="pass-row">
+                            <span class="pass-label">Grado / Grupo</span>
+                            <span class="pass-value" id="out_grupo">-</span>
+                        </div>
+                        <div class="pass-row">
+                            <span class="pass-label">Fecha y Hora</span>
+                            <span class="pass-value" id="out_fechahora">-</span>
+                        </div>
+                        <div class="pass-row">
+                            <span class="pass-label">Tutor Autorizado</span>
+                            <span class="pass-value" id="out_tutor">-</span>
+                        </div>
+                        <div class="pass-row">
+                            <span class="pass-label">CURP Tutor</span>
+                            <span class="pass-value" id="out_curp">-</span>
+                        </div>
+
+                        <div class="pass-reason">
+                            <div class="pass-label" style="margin-bottom: 3px;">Motivo:</div>
+                            <div class="pass-value" id="out_motivo" style="text-align: left;">-</div>
+                        </div>
+
+                        <div class="pass-signatures">
+                            <div class="signature-box">Firma del Tutor</div>
+                            <div class="signature-box">Sello / Orientación</div>
+                        </div>
+                    </div>
+
+                    <div class="pass-footer">
+                        VÁLIDO ÚNICAMENTE POR EL DÍA Y HORA ESPECIFICADOS
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- PESTAÑA 2: MÓDULO DE VALIDACIÓN RÁPIDA -->
+    <div id="tab-validar" class="tab-content">
+        <div class="panel-form" style="max-width: 500px; margin: 0 auto;">
+            <h2>Validación de Pase en Puerta</h2>
+            <form onsubmit="validarPase(event)">
+                <div class="form-group">
+                    <label>Matrícula del Alumno</label>
+                    <input type="text" id="val_matricula" placeholder="Ej. 2131905001" required>
+                </div>
+                <div class="form-group">
+                    <label>CURP del Tutor</label>
+                    <input type="text" id="val_curp" maxlength="18" style="text-transform:uppercase;" placeholder="18 Caracteres" required>
+                </div>
+                <button type="submit" class="btn-action">Verificar Salida</button>
+            </form>
+
+            <div id="val_resultado" style="display:none; margin-top: 15px; padding: 12px; border-radius: 6px; font-weight: 700; text-align: center; font-size: 0.85rem;"></div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // Inicializar Fechas
+    document.getElementById('in_fecha').valueAsDate = new Date();
+    const now = new Date();
+    document.getElementById('in_hora').value = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+    // Cambiar Pestañas
+    function showTab(tab) {
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        
+        if (tab === 'generar') {
+            document.querySelectorAll('.tab-btn')[0].classList.add('active');
+            document.getElementById('tab-generar').classList.add('active');
+        } else {
+            document.querySelectorAll('.tab-btn')[1].classList.add('active');
+            document.getElementById('tab-validar').classList.add('active');
+        }
+    }
+
+    // Sincronización en Tiempo Real
+    function updatePass() {
+        document.getElementById('out_nombre').innerText = document.getElementById('in_nombre').value || '---';
+        document.getElementById('out_matricula').innerText = document.getElementById('in_matricula').value || '---';
+        document.getElementById('out_grupo').innerText = document.getElementById('in_grupo').value || '---';
+        
+        const fecha = document.getElementById('in_fecha').value;
+        const hora = document.getElementById('in_hora').value;
+        document.getElementById('out_fechahora').innerText = `${fecha} (${hora} hrs)`;
+
+        document.getElementById('out_tutor').innerText = document.getElementById('in_tutor').value || '---';
+        document.getElementById('out_curp').innerText = (document.getElementById('in_curp').value || '---').toUpperCase();
+        document.getElementById('out_motivo').innerText = document.getElementById('in_motivo').value || '---';
+    }
+
+    // Validar Formato CURP vía JS sin BD
+    function validarPase(e) {
+        e.preventDefault();
+        const curp = document.getElementById('val_curp').value.toUpperCase();
+        const res = document.getElementById('val_resultado');
+        
+        const patronCurp = /^[A-Z]{4}[0-9]{6}[HM][A-Z]{2}[B-DF-HJ-NP-TV-Z]{3}[0-9A-Z][0-9]$/;
+
+        res.style.display = 'block';
+        if (patronCurp.test(curp)) {
+            res.style.background = '#dcfce7';
+            res.style.color = '#15803d';
+            res.style.border = '1px solid #bbf7d0';
+            res.innerText = '✓ ACCESO AUTORIZADO: El formato de datos y CURP es válido para la salida.';
+        } else {
+            res.style.background = '#fee2e2';
+            res.style.color = '#991b1b';
+            res.style.border = '1px solid #fca5a5';
+            res.innerText = '✕ DENEGADO: El formato de la CURP ingresada no es válido.';
+        }
+    }
+
+    // Carga Inicial
+    updatePass();
+</script>
+
+</body>
+</html>
